@@ -1,0 +1,99 @@
+version: "3"
+services:
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    image: prj-nginx
+    container_name: prj-nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+    depends_on:
+      - front
+      - back
+    networks:
+      - app-network
+
+  front:
+    build:
+      context: .
+      dockerfile: ./docker/front/Dockerfile_local
+    container_name: prj-front
+    restart: unless-stopped
+    environment:
+      PORT: 9100
+    working_dir: /app
+    volumes:
+      - ./front:/app
+    command: sh -c 'yarn run dev'
+    tty: true
+    ports:
+      - "9100:9100"
+    depends_on:
+      - back
+    networks:
+      - app-network
+
+  back:
+    build:
+      context: .
+      dockerfile: ./docker/back/Dockerfile_local
+    image: prj-back
+    container_name: prj-back
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./back:/app
+    command: sh -c 'go run main.go'
+    tty: true
+    ports:
+      - "9200:9200"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:5.7.22
+    container_name: prj-mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: prj
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: dbpass
+      TZ: 'Asia/Tokyo'
+    volumes:
+      - mysql-volume:/var/lib/mysql/
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - app-network
+
+  redis:
+    image: redis:rc-alpine3.11
+    container_name: prj-redis
+    volumes:
+      - redis-volume:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
+
+
+volumes:
+  mysql-volume:
+    driver: local
+  redis-volume:
+    driver: local
