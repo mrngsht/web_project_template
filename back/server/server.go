@@ -2,8 +2,8 @@ package server
 
 import (
 	"back/api"
+	"back/conf"
 	"back/server/middleware"
-	"back/shared/dep"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +22,6 @@ func Run() {
 	api.Route(r.Group("/api"))
 
 	if err := r.Run(":9200"); err != nil {
-		dep.Log.Errorf("gin serverでエラー: %+v", err)
+		conf.Log.Errorf("gin serverでエラー: %+v", err)
 	}
 }

@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"back/shared/dep"
-	"back/shared/errtype"
+	"back/conf"
+	"back/internal/httperr"
 	"golang.org/x/xerrors"
 	"net/http"
 
@@ -15,7 +15,7 @@ func ErrorHandler() gin.HandlerFunc {
 
 		errCount := len(c.Errors)
 		if errCount > 1 {
-			dep.Log.Warnf("複数のエラーがcontextに登録されました。ハンドリングに使用されなかったエラー: \n%s", c.Errors[:errCount].String())
+			conf.Log.Warnf("複数のエラーがcontextに登録されました。ハンドリングに使用されなかったエラー: \n%s", c.Errors[:errCount].String())
 		}
 
 		lastErr := c.Errors.Last()
@@ -23,7 +23,7 @@ func ErrorHandler() gin.HandlerFunc {
 			return
 		}
 
-		var msgResp *errtype.ForMsgResponse
+		var msgResp *httperr.StrMsgResponse
 		if xerrors.As(lastErr, &msgResp) {
 			c.AbortWithStatusJSON(msgResp.HttpStatus, gin.H{"message": msgResp.Message})
 			return
@@ -31,7 +31,7 @@ func ErrorHandler() gin.HandlerFunc {
 
 		// 共通的にハンドリングしたいエラー型を追加する場合はこのあたりに書く
 
-		dep.Log.Errorf("unhandled server error: %+v", lastErr)
+		conf.Log.Errorf("unhandled server error: %+v", lastErr)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
 	}
 }

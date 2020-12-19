@@ -1,4 +1,4 @@
-package dep
+package conf
 
 import (
 	"os"
@@ -12,7 +12,7 @@ func init() {
 	l := logrus.New()
 
 	// see here: https://github.com/sirupsen/logrus/blob/0c8c93fe4d2fb9013b83ae5f3151608f69f562ca/logrus.go#L25
-	if level, err := logrus.ParseLevel(GetEnv("LOG_LEVEL", "debug")); err != nil {
+	if level, err := logrus.ParseLevel(getEnv("LOG_LEVEL", "debug")); err != nil {
 		panic(err)
 	} else {
 		l.SetLevel(level)

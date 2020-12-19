@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"back/shared/dep"
+	"back/conf"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
@@ -13,7 +13,7 @@ import (
 const GoApiSessionName = "go_api_session"
 
 func Session() gin.HandlerFunc {
-	store, err := redis.NewStore(10, "tcp", dep.RedisHost+":"+dep.RedisPort, dep.RedisPassword, []byte(dep.GoAppKey))
+	store, err := redis.NewStore(10, "tcp", conf.RedisHost+":"+conf.RedisPort, conf.RedisPassword, []byte(conf.GoAppKey))
 	if err != nil {
 		panic(err)
 	}
